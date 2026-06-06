@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>LCM Short Division Notebook Mission</title>
+<style>
+*{box-sizing:border-box}
+:root{
+  --paper:#fff8df;
+  --line:#b7ddff;
+  --ink:#123e8a;
+  --red:#e53935;
+  --green:#1fa463;
+  --yellow:#ffd95a;
+  --dark:#25304a;
+}
+body{
+  margin:0;
+  font-family:Tahoma,Arial,sans-serif;
+  min-height:100vh;
+  color:var(--dark);
+  background:
+    radial-gradient(circle at 12% 10%,rgba(255,217,90,.35),transparent 22%),
+    radial-gradient(circle at 90% 18%,rgba(80,160,255,.24),transparent 24%),
+    linear-gradient(135deg,#f7e7b5,#d7ecff);
+}
+.wrap{width:min(1120px,96vw);margin:auto;padding:16px 0 30px}
+.header{display:flex;justify-content:space-between;align-items:center;gap:10px;margin-bottom:10px}
+.logo{font-size:clamp(18px,3vw,28px);font-weight:1000;color:#123e8a}
+.tag{background:#fff;border:3px solid #123e8a;border-radius:999px;padding:8px 14px;font-weight:1000;color:#e53935}
+.screen{display:none}.screen.active{display:block}
+.card{
+  position:relative;
+  border-radius:28px;
+  padding:clamp(18px,4vw,34px);
+  background:
+    linear-gradient(var(--line) 1px, transparent 1px),
+    var(--paper);
+  background-size:100% 34px;
+  border:4px solid #123e8a;
+  box-shadow:0 12px 0 rgba(18,62,138,.18),0 18px 38px rgba(0,0,0,.12);
+  overflow:hidden;
+}
+.decor{position:absolute;font-size:44px;opacity:.95;pointer-events:none}
+.d1{right:20px;top:20px;transform:rotate(18deg)}
+.d2{left:22px;bottom:18px;transform:rotate(-18deg)}
+.d3{right:34px;bottom:20px;transform:rotate(8deg)}
+h1{font-size:clamp(34px,6vw,64px);margin:4px 0 10px;color:#123e8a;line-height:1.05}
+p{font-size:clamp(16px,2.4vw,22px);line-height:1.65;font-weight:700}
+.rules{display:grid;grid-template-columns:repeat(auto-fit,minmax(230px,1fr));gap:12px;margin:16px 0}
+.rule{background:#fff;border:3px dashed #5a91d8;border-radius:18px;padding:14px;font-weight:1000;line-height:1.45}
+.nameRow{display:flex;gap:10px;flex-wrap:wrap;margin-top:14px}
+input{
+  border:3px solid #123e8a;outline:0;border-radius:14px;padding:12px;
+  font-size:21px;font-weight:1000;background:#fff;color:#123e8a;min-width:0;
+}
+#playerName{flex:1;min-width:220px}
+button{
+  border:0;border-radius:16px;padding:14px 18px;font-size:18px;font-weight:1000;cursor:pointer;
+  background:linear-gradient(#ffe88a,#ffc928);color:#15223b;box-shadow:0 7px 0 #b17f00;
+}
+button:active{transform:translateY(4px);box-shadow:0 3px 0 #b17f00}
+.btnBlue{background:linear-gradient(#88c8ff,#3c8cff);box-shadow:0 7px 0 #15549b;color:#071426}
+.btnGreen{background:linear-gradient(#8cffc1,#22cf7a);box-shadow:0 7px 0 #0a7b43}
+.btnRed{background:linear-gradient(#ff9d9d,#e53935);box-shadow:0 7px 0 #9e1714;color:#250000}
+.btnGray{background:linear-gradient(#ffffff,#dbe3ef);box-shadow:0 7px 0 #8790a1}
+.topbar{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;margin-bottom:8px}
+.pill{background:#fff;border:3px solid #123e8a;border-radius:999px;padding:9px 13px;font-weight:1000}
+.title{text-align:center;font-size:clamp(26px,4.5vw,44px);font-weight:1000;color:#123e8a;margin:4px 0}
+.hint{text-align:center;font-size:clamp(16px,2.4vw,22px);font-weight:900;color:#d02121;margin:4px 0 12px}
+
+/* notebook division */
+.boardWrap{
+  background:rgba(255,255,255,.72);
+  border:4px solid #123e8a;
+  border-radius:24px;
+  padding:16px 8px 20px;
+  margin:12px 0;
+  overflow:auto;
+}
+.shortTable{
+  display:grid;
+  grid-template-columns:100px 1fr 54px;
+  width:max-content;
+  min-width:380px;
+  margin:0 auto;
+  font-weight:1000;
+}
+.corner{min-height:58px}
+.topNums{
+  display:grid;gap:10px;padding:0 12px 8px;
+  border-bottom:6px solid var(--ink);
+  position:relative;
+}
+.topNums:before{content:"";position:absolute;left:-6px;bottom:-6px;width:6px;height:26px;background:var(--ink)}
+.topNum{
+  min-width:74px;min-height:54px;border-radius:12px;background:#fff;border:3px solid #123e8a;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(26px,5vw,42px);color:#123e8a;
+}
+.shortRow,.currentRow{display:contents}
+.divisorSlot{
+  min-height:62px;display:flex;align-items:center;justify-content:flex-end;padding-right:14px;
+  font-size:clamp(26px,5vw,42px);color:#d02121;
+}
+.resultLine{
+  display:grid;gap:10px;padding:8px 12px;border-left:6px solid var(--ink);position:relative;
+}
+.cell{
+  min-width:74px;min-height:52px;border-radius:12px;background:#fff;border:3px solid #123e8a;
+  display:flex;align-items:center;justify-content:center;font-size:clamp(23px,4.5vw,36px);color:#123e8a;
+}
+.finalLine{position:relative;padding-bottom:16px}
+.finalLine:after{
+  content:"";position:absolute;left:12px;right:12px;bottom:2px;height:7px;border-radius:999px;
+  background:var(--red);box-shadow:0 0 10px rgba(229,57,53,.45);
+  animation:draw .65s ease both;
+}
+@keyframes draw{from{transform:scaleX(0);transform-origin:left}to{transform:scaleX(1);transform-origin:left}}
+.finalCell{background:#fff1f1;border-color:var(--red);color:#b51616}
+.mark{min-height:62px;display:flex;align-items:center;justify-content:center;font-size:30px}
+.divisorInputBox{display:flex;align-items:center;justify-content:flex-end;padding:8px 12px 8px 0}
+.divisorInputBox input{width:82px;text-align:center;color:#d02121}
+.inputLine{display:grid;gap:10px;padding:8px 12px;border-left:6px solid var(--ink)}
+.inputLine input{width:74px;min-width:74px;text-align:center}
+.checkArea{text-align:center;margin:12px 0}
+.decision,.finalBox{
+  display:none;background:#fff;border:3px dashed #e53935;border-radius:20px;padding:14px;margin-top:12px;
+}
+.decision.active,.finalBox.active{display:block}
+.decisionBtns{display:flex;justify-content:center;gap:10px;flex-wrap:wrap}
+.finalGrid{display:grid;grid-template-columns:1fr auto;gap:10px;align-items:end}
+.finalGrid input{width:100%;text-align:center}
+.msg{text-align:center;min-height:36px;font-size:clamp(18px,3vw,28px);font-weight:1000;margin-top:10px}
+.good{color:var(--green)}.bad{color:var(--red)}
+.overlay{position:fixed;inset:0;display:none;align-items:center;justify-content:center;background:rgba(0,0,0,.55);z-index:20}
+.overlay.active{display:flex}
+.boom{font-size:clamp(60px,13vw,150px);font-weight:1000;text-align:center;color:#fff;animation:pop .5s ease both;text-shadow:0 0 22px rgba(255,255,255,.7)}
+.boom small{display:block;font-size:clamp(20px,4vw,40px);margin-top:8px}
+@keyframes pop{from{transform:scale(.3);opacity:0}70%{transform:scale(1.08);opacity:1}to{transform:scale(1)}}
+.summaryGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:16px 0}
+.sumCard{background:#fff;border:3px solid #123e8a;border-radius:18px;padding:14px;text-align:center;font-weight:1000}
+.sumCard b{display:block;font-size:34px;color:#d02121}
+table{width:100%;border-collapse:collapse;background:#fff;border:3px solid #123e8a;border-radius:16px;overflow:hidden}
+th,td{border-bottom:2px solid #b7ddff;padding:10px;text-align:center;font-weight:900}
+th{background:#d7ecff;color:#123e8a}
+@media(min-width:1000px){
+  .wrap{width:min(1500px,98vw)}
+  .card{min-height:calc(100vh - 86px);display:flex;flex-direction:column;justify-content:center}
+  #gameScreen .card{justify-content:flex-start}
+  .logo{font-size:34px}.tag{font-size:18px}
+  h1{font-size:76px} p{font-size:27px}
+  .rule{font-size:24px;padding:20px}
+  input{font-size:30px;padding:16px}
+  button{font-size:27px;padding:17px 26px}
+  .pill{font-size:22px;padding:12px 18px}
+  .title{font-size:52px}.hint{font-size:26px}
+  .boardWrap{flex:1;display:flex;align-items:center;justify-content:center}
+  .shortTable{grid-template-columns:140px 1fr 76px;min-width:760px}
+  .topNums{gap:18px;border-bottom-width:8px}
+  .topNums:before{left:-8px;bottom:-8px;width:8px;height:34px}
+  .topNum,.cell{min-width:132px;min-height:78px;font-size:56px}
+  .divisorSlot{font-size:60px;min-height:92px;padding-right:24px}
+  .resultLine,.inputLine{gap:18px;border-left-width:8px;padding:12px 20px}
+  .divisorInputBox input{width:118px;font-size:42px}
+  .inputLine input{width:132px;min-width:132px;font-size:42px}
+  .mark{font-size:46px;min-height:92px}
+}
+@media(max-width:720px){
+  .topbar{grid-template-columns:1fr 1fr}
+  .topbar .pill:first-child{grid-column:1/-1}
+  .shortTable{grid-template-columns:74px 1fr 42px;min-width:330px}
+  .topNums,.resultLine,.inputLine{gap:6px;padding-left:8px;padding-right:8px}
+  .topNum,.cell,.inputLine input{min-width:58px;width:58px}
+  .divisorInputBox input{width:62px}
+  button{width:100%}
+  .finalGrid{grid-template-columns:1fr}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div class="header">
+    <div class="logo">Kru Pai Classroom ✦ LCM Notebook Mission</div>
+    <div class="tag">ค.ร.น. หารสั้น</div>
+  </div>
+
+  <section id="startScreen" class="screen active">
+    <div class="card">
+      <div class="decor d1">✏️</div><div class="decor d2">🩷</div><div class="decor d3">📏</div>
+      <h1>ภารกิจหารสั้น<br>พิชิต ค.ร.น.</h1>
+      <p>กติกา: ถ้ามี 3 จำนวน ให้มองหาตัวหารที่หารได้ทั้ง 3 จำนวนก่อน ถ้าไม่ได้ จึงใช้ตัวหารที่หารได้ 2 จำนวน และตัวที่หารไม่ได้ต้องดึงลงมาเอง</p>
+      <div class="rules">
+        <div class="rule">1️⃣ เติมตัวหารเอง และเติมผลลัพธ์ทุกช่องเอง</div>
+        <div class="rule">2️⃣ ตัวที่หารไม่ได้ ต้องเติมจำนวนเดิมลงมา</div>
+        <div class="rule">3️⃣ ตัดสินใจเองว่าจะ “หารต่อ” หรือ “หารต่อไม่ได้แล้ว”</div>
+        <div class="rule">4️⃣ เส้นใต้สีแดงคือผลลัพธ์สุดท้าย ใช้หา ค.ร.น.</div>
+      </div>
+      <div class="nameRow">
+        <input id="playerName" placeholder="พิมพ์ชื่อผู้เล่น...">
+        <button id="startBtn" class="btnBlue" type="button">เริ่มภารกิจ ✏️</button>
+        <button id="fullBtn" class="btnGray" type="button">เต็มจอ 📺</button>
+      </div>
+    </div>
+  </section>
+
+  <section id="gameScreen" class="screen">
+    <div class="card">
+      <div class="decor d1">🖊️</div><div class="decor d2">✏️</div><div class="decor d3">🩷</div>
+      <div class="topbar">
+        <div class="pill">ผู้เล่น: <span id="nameShow">-</span></div>
+        <div class="pill">ข้อ <span id="qNo">1</span>/5</div>
+        <div class="pill">แก้ซ้ำ <span id="retryShow">0</span></div>
+      </div>
+
+      <div class="title">เขียนหารสั้นหา ค.ร.น.</div>
+      <div id="hint" class="hint">ถ้าหารได้ครบ 3 ตัว ให้ทำก่อน</div>
+
+      <div class="boardWrap" id="boardWrap">
+        <div id="shortTable" class="shortTable"></div>
+      </div>
+
+      <div id="checkArea" class="checkArea">
+        <button id="checkRowBtn" class="btnGreen" type="button">ตรวจแถวนี้ ✅</button>
+      </div>
+
+      <div id="decisionPanel" class="decision">
+        <div class="decisionBtns">
+          <button id="continueBtn" class="btnBlue" type="button">หารต่อ ➕</button>
+          <button id="stopBtn" class="btnRed" type="button">หารต่อไม่ได้แล้ว 🛑</button>
+        </div>
+      </div>
+
+      <div id="finalBox" class="finalBox">
+        <div class="title">ตอบคำตอบสุดท้าย</div>
+        <p style="margin:0 0 8px;text-align:center;color:#123e8a">ค.ร.น. = ตัวหารด้านซ้ายทั้งหมด × เลขแถวสุดท้ายทั้งหมด</p>
+        <div class="finalGrid">
+          <input id="lcmInput" inputmode="numeric" pattern="[0-9]*" placeholder="ค.ร.น. = ?">
+          <button id="checkFinalBtn" class="btnGreen" type="button">ตรวจคำตอบ 🎯</button>
+        </div>
+      </div>
+
+      <div id="msg" class="msg"></div>
+    </div>
+  </section>
+
+  <section id="summaryScreen" class="screen">
+    <div class="card">
+      <h1>สรุปผลการฝึก 🏆</h1>
+      <div class="summaryGrid">
+        <div class="sumCard">ผู้เล่น <b id="sumName">-</b></div>
+        <div class="sumCard">ผ่านครั้งแรก <b id="sumFirst">0</b></div>
+        <div class="sumCard">แก้ซ้ำทั้งหมด <b id="sumRetry">0</b></div>
+      </div>
+      <table>
+        <thead><tr><th>ข้อ</th><th>โจทย์</th><th>ค.ร.น.</th><th>พลาด</th><th>ผล</th></tr></thead>
+        <tbody id="resultRows"></tbody>
+      </table>
+      <div class="nameRow">
+        <button id="restartBtn" class="btnBlue" type="button">กลับหน้าแรก 🔁</button>
+      </div>
+    </div>
+  </section>
+</div>
+
+<div id="overlay" class="overlay"><div id="boom" class="boom"></div></div>
+
+<script>
+(function(){
+  const questions = [
+    {nums:[12,24,10], lcm:120},
+    {nums:[12,18,20], lcm:180},
+    {nums:[8,12,18], lcm:72},
+    {nums:[15,20,30], lcm:60},
+    {nums:[6,14,21], lcm:42}
+  ];
+
+  let player="", qIndex=0, originalNums=[], currentNums=[], rows=[], finalUnderlined=false;
+  let retryThis=0, totalRetry=0, firstPass=0, results=[], hadMistake=false, waitingDecision=false;
+  const $=id=>document.getElementById(id);
+
+  function gcd2(a,b){a=Math.abs(a);b=Math.abs(b);while(b){let t=b;b=a%b;a=t}return a}
+  function gcdArr(arr){return arr.reduce((a,b)=>gcd2(a,b))}
+  function lcm2(a,b){return Math.abs(a*b)/gcd2(a,b)}
+  function lcmArr(arr){return arr.reduce((a,b)=>lcm2(a,b))}
+
+  function beep(type){
+    try{
+      const ctx=new (window.AudioContext||window.webkitAudioContext)();
+      const o=ctx.createOscillator(), g=ctx.createGain();
+      o.connect(g);g.connect(ctx.destination);
+      if(type==="bad"){o.frequency.setValueAtTime(170,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(75,ctx.currentTime+.24);g.gain.setValueAtTime(.14,ctx.currentTime)}
+      else{o.frequency.setValueAtTime(560,ctx.currentTime);o.frequency.exponentialRampToValueAtTime(980,ctx.currentTime+.14);g.gain.setValueAtTime(.1,ctx.currentTime)}
+      g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+.3);o.start();o.stop(ctx.currentTime+.31)
+    }catch(e){}
+  }
+  function showScreen(id){document.querySelectorAll(".screen").forEach(s=>s.classList.remove("active"));$(id).classList.add("active")}
+  function setMsg(t,c){$("msg").textContent=t||"";$("msg").className="msg"+(c?" "+c:"")}
+  function showOverlay(icon,text,good){
+    $("boom").innerHTML=icon+"<small>"+text+"</small>";
+    $("boom").style.color=good?"#8cffc1":"#ff9d9d";
+    $("overlay").classList.add("active");
+  }
+  function hideOverlay(){$("overlay").classList.remove("active")}
+  function startGame(){
+    player=$("playerName").value.trim()||"นักคณิตตัวน้อย";
+    qIndex=0; totalRetry=0; firstPass=0; results=[];
+    $("nameShow").textContent=player;
+    showScreen("gameScreen"); loadQuestion(true);
+  }
+  function loadQuestion(newQ){
+    const q=questions[qIndex];
+    originalNums=q.nums.slice(); currentNums=q.nums.slice(); rows=[]; finalUnderlined=false; waitingDecision=false;
+    if(newQ){retryThis=0; hadMistake=false}
+    $("qNo").textContent=qIndex+1; $("retryShow").textContent=totalRetry;
+    $("checkArea").style.display="block"; $("decisionPanel").classList.remove("active"); $("finalBox").classList.remove("active"); $("lcmInput").value="";
+    $("hint").textContent="ถ้าหารได้ครบ 3 ตัว ให้ทำก่อน / ถ้าไม่ได้ ใช้ตัวหารที่หารได้ 2 ตัว และดึงตัวที่เหลือลงมา";
+    renderBoard(true); setMsg("");
+  }
+  function renderBoard(showInput){
+    const col=originalNums.length; let html="";
+    html+='<div class="corner"></div><div class="topNums" style="grid-template-columns:repeat('+col+',minmax(58px,1fr))">';
+    html+=originalNums.map(n=>'<div class="topNum">'+n+'</div>').join("")+'</div><div></div>';
+    rows.forEach((r,i)=>{
+      const fin=finalUnderlined && i===rows.length-1;
+      html+='<div class="shortRow"><div class="divisorSlot">'+r.divisor+'</div>';
+      html+='<div class="resultLine '+(fin?'finalLine':'')+'" style="grid-template-columns:repeat('+col+',minmax(58px,1fr))">';
+      html+=r.after.map(n=>'<div class="cell '+(fin?'finalCell':'')+'">'+n+'</div>').join("")+'</div>';
+      html+='<div class="mark">'+(fin?'⭐':'✅')+'</div></div>';
+    });
+    if(showInput){
+      html+='<div class="currentRow"><div class="divisorInputBox"><input id="divisorInput" inputmode="numeric" pattern="[0-9]*" placeholder="?"></div>';
+      html+='<div class="inputLine" style="grid-template-columns:repeat('+col+',minmax(58px,1fr))">';
+      html+=currentNums.map(()=>'<input class="quotInput" inputmode="numeric" pattern="[0-9]*" placeholder="?">').join("")+'</div>';
+      html+='<div class="mark">✎</div></div>';
+    }
+    $("shortTable").innerHTML=html;
+    setTimeout(()=>{const x=$("divisorInput"); if(x)x.focus()},80);
+  }
+
+  function countDivisible(nums,d){return nums.filter(n=>n%d===0).length}
+  function hasThreeCommon(nums){return nums.length===3 && gcdArr(nums)>1}
+  function hasAtLeastTwoCommon(nums){
+    for(let d=2; d<=Math.max(...nums); d++){
+      if(countDivisible(nums,d)>=2) return true;
+    }
+    return false;
+  }
+
+  function checkRow(){
+    if(waitingDecision) return;
+    const d=parseInt($("divisorInput")?.value,10);
+    const answers=Array.from(document.querySelectorAll(".quotInput")).map(x=>parseInt(x.value,10));
+    if(!Number.isInteger(d)||d<=1||answers.some(x=>!Number.isInteger(x))){fail("เติมตัวเลขให้ครบ และตัวหารต้องมากกว่า 1");return}
+
+    const divCount=countDivisible(currentNums,d);
+    if(divCount<2){fail("ค.ร.น. ต้องใช้ตัวหารที่หารได้อย่างน้อย 2 จำนวน");return}
+
+    // Rule: if current row has 3-number common divisor, chosen divisor must divide all 3
+    if(currentNums.length===3 && hasThreeCommon(currentNums) && divCount<3){
+      fail("ยังมีตัวหารที่หารได้ทั้ง 3 จำนวน ควรทำแบบนั้นก่อน");
+      return;
+    }
+
+    const expected=currentNums.map(n=> n%d===0 ? n/d : n);
+    const ok=answers.every((v,i)=>v===expected[i]);
+    if(!ok){fail("ผลลัพธ์ยังไม่ถูก ตัวที่หารไม่ได้ต้องดึงเลขเดิมลงมา");return}
+
+    rows.push({divisor:d,before:currentNums.slice(),after:answers.slice()});
+    currentNums=answers.slice(); waitingDecision=true;
+    renderBoard(false); $("checkArea").style.display="none"; $("decisionPanel").classList.add("active");
+    setMsg("✅ ถูกต้อง! ตัดสินใจต่อว่าจะหารต่อไหม","good"); beep("ok");
+  }
+
+  function chooseContinue(want){
+    const can=hasAtLeastTwoCommon(currentNums);
+    if(want && can){
+      waitingDecision=false; $("decisionPanel").classList.remove("active"); $("checkArea").style.display="block";
+      renderBoard(true); setMsg("ไปต่อได้ เติมแถวใหม่เลย ✏️","good"); beep("ok"); return;
+    }
+    if(want && !can){fail("จริง ๆ แล้วหารต่อไม่ได้แล้ว");return}
+    if(!want && can){fail("ยังมีเลขอย่างน้อย 2 จำนวนที่หารต่อได้");return}
+
+    finalUnderlined=true; renderBoard(false); $("decisionPanel").classList.remove("active"); $("finalBox").classList.add("active");
+    setMsg("เส้นใต้สีแดงคือผลลัพธ์สุดท้าย ใช้ตอบ ค.ร.น. 🎯","good"); beep("ok");
+  }
+
+  function checkFinal(){
+    const q=questions[qIndex]; const ans=parseInt($("lcmInput").value,10);
+    if(ans===q.lcm){
+      if(!hadMistake) firstPass++;
+      results.push({no:qIndex+1, nums:q.nums.join(" | "), lcm:q.lcm, retries:retryThis, status:!hadMistake?"ผ่านครั้งแรก ✅":"ผ่านหลังแก้ซ้ำ 🔁"});
+      showOverlay("🎉",!hadMistake?"ผ่านครั้งแรก!":"ผ่านแล้ว!",true); beep("ok");
+      setTimeout(()=>{hideOverlay(); qIndex++; if(qIndex>=questions.length) showSummary(); else loadQuestion(true)},1000);
+    }else fail("คำตอบ ค.ร.น. ยังไม่ถูก");
+  }
+
+  function fail(text){
+    hadMistake=true; retryThis++; totalRetry++; $("retryShow").textContent=totalRetry;
+    showOverlay("❌",text+"<br>เริ่มข้อเดิมใหม่",false); beep("bad");
+    setTimeout(()=>{hideOverlay(); loadQuestion(false)},1400);
+  }
+
+  function showSummary(){
+    showScreen("summaryScreen");
+    $("sumName").textContent=player; $("sumFirst").textContent=firstPass+"/"+questions.length; $("sumRetry").textContent=totalRetry;
+    $("resultRows").innerHTML=results.map(r=>"<tr><td>"+r.no+"</td><td>"+r.nums+"</td><td>"+r.lcm+"</td><td>"+r.retries+"</td><td>"+r.status+"</td></tr>").join("");
+  }
+
+  function restart(){ $("playerName").value=""; showScreen("startScreen") }
+  function full(){ const el=document.documentElement; if(el.requestFullscreen) el.requestFullscreen(); else if(el.webkitRequestFullscreen) el.webkitRequestFullscreen(); }
+
+  document.addEventListener("DOMContentLoaded",()=>{
+    $("startBtn").addEventListener("click",startGame);
+    $("fullBtn").addEventListener("click",full);
+    $("checkRowBtn").addEventListener("click",checkRow);
+    $("continueBtn").addEventListener("click",()=>chooseContinue(true));
+    $("stopBtn").addEventListener("click",()=>chooseContinue(false));
+    $("checkFinalBtn").addEventListener("click",checkFinal);
+    $("restartBtn").addEventListener("click",restart);
+  });
+})();
+</script>
+</body>
+</html>
